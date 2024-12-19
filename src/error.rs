@@ -1,5 +1,6 @@
 //! Errors.
 
+use std::error::Error as StdError;
 use std::time::SystemTimeError;
 use std::fmt;
 
@@ -32,6 +33,17 @@ impl From<SystemTimeError> for Error {
 impl From<base64::DecodeError> for Error {
     fn from(e: base64::DecodeError) -> Self {
         Self::InvalidSecret(e)
+    }
+}
+
+impl StdError for Error {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        match self {
+            Self::InvalidSecret(e) => Some(e),
+            Self::SystemTime(e) => Some(e),
+            Self::IO(e) => Some(e),
+            Self::EmptySecret => None,
+        }
     }
 }
 
